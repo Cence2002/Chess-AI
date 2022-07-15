@@ -1,6 +1,7 @@
 package chessai.pieces;
 
 import chessai.game.Board;
+import chessai.game.Color;
 import chessai.game.Move;
 
 import java.util.ArrayList;
@@ -16,11 +17,6 @@ public abstract class Piece {
     56-a8
     63-h8
      */
-    public int color;
-    /*
-    0-black
-    1-white
-     */
     public int type;
     /*
     0-none
@@ -31,8 +27,9 @@ public abstract class Piece {
     5-rook
     6-queen
      */
+    public Color color;
 
-    public Piece(int color, int type, int position) {
+    public Piece(Color color, int type, int position) {
         this.color = color;
         this.type = type;
         this.position = position;

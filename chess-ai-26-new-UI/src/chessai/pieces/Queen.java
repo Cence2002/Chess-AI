@@ -1,6 +1,7 @@
 package chessai.pieces;
 
 import chessai.game.Board;
+import chessai.game.Color;
 import chessai.game.Move;
 import chessai.game.Position;
 
@@ -11,20 +12,20 @@ public class Queen extends Piece {
     public static int[][][] destination = new int[64][8][10];
     public static int[][] attacks;
 
-    public Queen(int color, int position) {
+    public Queen(Color color, int position) {
         super(color, Pieces.Queen, position);
     }
 
     public static void calculateDestination() {
-        Position[] headings = new Position[]{
+        Position[] headings = {
+                new Position(1, 0),
+                new Position(1, 1),
+                new Position(0, 1),
+                new Position(-1, 1),
+                new Position(-1, 0),
                 new Position(-1, -1),
                 new Position(0, -1),
-                new Position(1, -1),
-                new Position(-1, 0),
-                new Position(1, 0),
-                new Position(-1, 1),
-                new Position(0, 1),
-                new Position(1, 1)
+                new Position(1, -1)
         };
 
         for (int pos = 0; pos < 64; pos++) {

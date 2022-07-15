@@ -2,6 +2,7 @@ package chessai.hash;
 
 import chessai.Main;
 import chessai.game.Board;
+import chessai.game.Color;
 import chessai.pieces.Piece;
 
 import java.util.Arrays;
@@ -60,10 +61,10 @@ public class Hash {
         for (int pos = 0; pos < 64; pos++) {
             Piece piece = board.getPiece(pos);
             if (piece != null) {
-                hash ^= positionValues[pos][piece.color * 10 + piece.type];
+                hash ^= positionValues[pos][(piece.color == Color.WHITE ? 10 : 0) + piece.type];
             }
         }
-        hash ^= ((board.active == 1) ? whiteActiveValue : blackActiveValue);
+        hash ^= ((board.active == Color.WHITE) ? whiteActiveValue : blackActiveValue);
         if (board.enPassant[board.step] >= 0) {
             hash ^= enPassantValues[board.enPassant[board.step]];
         }

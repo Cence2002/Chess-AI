@@ -1,6 +1,7 @@
 package chessai.pieces;
 
 import chessai.game.Board;
+import chessai.game.Color;
 import chessai.game.Move;
 import chessai.game.Position;
 
@@ -11,7 +12,7 @@ public class Rook extends Piece {
     public static int[][][] destination = new int[64][4][10];
     public static int[][] attacks;
 
-    public Rook(int color, int position) {
+    public Rook(Color color, int position) {
         super(color, Pieces.Rook, position);
     }
 

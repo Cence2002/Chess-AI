@@ -19,7 +19,7 @@ public class Board {
     public int[] blackPieces;
 
     public int step;
-    public int active; // 1-white, 0-black
+    public Color active;
 
     public boolean[] castleWK;
     public boolean[] castleWQ;
@@ -94,7 +94,7 @@ public class Board {
                 y--;
                 continue;
             }
-            int color = Character.isUpperCase(fen.charAt(ind)) ? 1 : 0;
+            Color color = Character.isUpperCase(fen.charAt(ind)) ? Color.WHITE : Color.BLACK;
             Piece piece = null;
             int pos = 8 * y + x;
             switch (Character.toUpperCase(fen.charAt(ind))) {
@@ -106,7 +106,7 @@ public class Board {
                 case 'Q' -> piece = new Queen(color, pos);
             }
             setPiece(pos, piece, false);
-            if (color == 1) {
+            if (color == Color.WHITE) {
                 if (piece.type == Pieces.King) {
                     whiteKing = piece.position;
                 }
@@ -119,7 +119,7 @@ public class Board {
         }
 
         ind++;
-        active = (fen.charAt(ind) == 'w' ? 1 : 0);
+        active = (fen.charAt(ind) == 'w' ? Color.WHITE : Color.BLACK);
 
         for (ind += 2; fen.charAt(ind) != ' '; ind++) {
             switch (fen.charAt(ind)) {
@@ -164,18 +164,18 @@ public class Board {
         return moves;
     }
 
-    public boolean testMove(Move move, int color) {
+    public boolean testMove(Move move, Color color) {
         makeMove(move, 0);
         boolean isInCheck = isInCheck(color);
         unmakeMove(0);
         return !isInCheck;
     }
 
-    public boolean isInCheck(int color) {
-        return color == 1 ? attacked(whiteKing, color) : attacked(blackKing, color);
+    public boolean isInCheck(Color color) {
+        return color == Color.WHITE ? attacked(whiteKing, color) : attacked(blackKing, color);
     }
 
-    public boolean attacked(int target, int color) {
+    public boolean attacked(int target, Color color) {
         for (int d = 0; d < 16; d++) {
             for (int i = 0; King.checks[target][d][i] != -1; i++) {
                 int to = King.checks[target][d][i];
@@ -195,7 +195,7 @@ public class Board {
         Main.moveCount++;
         int pieceType = getPiece(move.from).type;
         if (pieceType == Pieces.King) {
-            if (active == 1) {
+            if (active == Color.WHITE) {
                 whiteKing = move.to;
             } else {
                 blackKing = move.to;
@@ -227,7 +227,7 @@ public class Board {
                     movePiece(56, 59, true);
                 }
                 case 5 -> {
-                    if (getPiece(move.from).color == 1) {
+                    if (getPiece(move.from).color == Color.WHITE) {
                         captured[step + 1] = getPiece(move.to - 8);
                         delPiece(move.to - 8, true);
                     } else {
@@ -237,7 +237,7 @@ public class Board {
                     movePiece(move.from, move.to, true);
                 }
                 default -> {
-                    int color = getPiece(move.from).color;
+                    Color color = getPiece(move.from).color;
                     promoted[step + 1] = getPiece(move.from);
                     delPiece(move.from, true);
                     switch (move.special - 8) {
@@ -250,7 +250,8 @@ public class Board {
             }
         }
 
-        active = 1 - active;
+        active = active.opposite();
+
 
         castleWK[step + 1] = (castleWK[(step)]
                 && !(move.involves(4))
@@ -320,7 +321,7 @@ public class Board {
     public void unmakeMove(int moveType) {
         Move move = moves[step];
         if (getPiece(move.to).type == Pieces.King) {
-            if (active == 1) {
+            if (active == Color.WHITE) {
                 blackKing = move.from;
             } else {
                 whiteKing = move.from;
@@ -362,7 +363,7 @@ public class Board {
             setPiece(promoted[step].position, promoted[step], false);
         }
 
-        active = 1 - active;
+        active = active.opposite();
 
         enPassant[step] = -1;
 
@@ -389,7 +390,7 @@ public class Board {
 
     public void modifyHash(int pos) {
         if (calculateHash) {
-            hash ^= Hash.positionValues[pos][getPiece(pos).color * 10 + getPiece(pos).type];
+            hash ^= Hash.positionValues[pos][(getPiece(pos).color == Color.WHITE ? 10 : 0) + getPiece(pos).type];
         }
     }
 
@@ -402,7 +403,7 @@ public class Board {
         if (makeMove) {
             modifyHash(pos);
         }
-        if (getPiece(pos).color == 1) {
+        if (getPiece(pos).color == Color.WHITE) {
             whitePieces[getPiece(pos).type]++;
         } else {
             blackPieces[getPiece(pos).type]++;
@@ -422,7 +423,7 @@ public class Board {
     }
 
     public void delPiece(int pos, boolean makeMove) {
-        if (getPiece(pos).color == 1) {
+        if (getPiece(pos).color == Color.WHITE) {
             whitePieces[getPiece(pos).type]--;
         } else {
             blackPieces[getPiece(pos).type]--;

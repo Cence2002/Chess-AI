@@ -34,8 +34,8 @@ public class Move implements Comparable<Move> {
         if (special >= 11) {
             eval += Evaluation.typeValue(special - 8) * 20;
         }
-        int pieceColor = board.getPiece(from).color;
-        int opponentKingPos = (pieceColor == 1) ? board.blackKing : board.whiteKing;
+        Color pieceColor = board.getPiece(from).color;
+        int opponentKingPos = (pieceColor == Color.WHITE) ? board.blackKing : board.whiteKing;
         if (board.getPiece(from).attacksTarget(board, opponentKingPos)) {
             eval += 5;
         }

@@ -1,6 +1,7 @@
 package chessai.pieces;
 
 import chessai.game.Board;
+import chessai.game.Color;
 import chessai.game.Move;
 import chessai.game.Position;
 
@@ -13,7 +14,7 @@ public class Pawn extends Piece {
     public static boolean[][] attacksWhite;
     public static boolean[][] attacksBlack;
 
-    public Pawn(int color, int position) {
+    public Pawn(Color color, int position) {
         super(color, Pieces.Pawn, position);
     }
 
@@ -96,13 +97,13 @@ public class Pawn extends Piece {
 
     @Override
     public boolean attacksTarget(Board board, int target) {
-        return color == 1 ? attacksWhite[position][target] : attacksBlack[position][target];
+        return color == Color.WHITE ? attacksWhite[position][target] : attacksBlack[position][target];
     }
 
     @Override
     public ArrayList<Move> generateMoves(Board board) {
         ArrayList<Move> moves = new ArrayList<>();
-        int[][] dir = (color == 1 ? destinationWhite : destinationBlack);
+        int[][] dir = (color == Color.WHITE ? destinationWhite : destinationBlack);
         int y = position / 8;
         for (int i = 0; i < 2; i++) {
             int to = dir[position][i];
@@ -116,7 +117,7 @@ public class Pawn extends Piece {
                 }
             } else {
                 if (board.getPiece(to).color != color) {
-                    if (color == 1 ? (y < 6) : (y > 1)) {
+                    if (color == Color.WHITE ? (y < 6) : (y > 1)) {
                         Move move = new Move(position, to);
                         if (board.testMove(move, color)) {
                             moves.add(move);
@@ -136,13 +137,13 @@ public class Pawn extends Piece {
         if (board.getPiece(to1) != null) {
             return moves;
         } else {
-            if (color == 1 ? (y < 6) : (y > 1)) {
+            if (color == Color.WHITE ? (y < 6) : (y > 1)) {
                 Move move = new Move(position, to1);
                 if (board.testMove(move, color)) {
                     moves.add(move);
                 }
 
-                if (color == 1 ? (y == 1) : (y == 6)) {
+                if (color == Color.WHITE ? (y == 1) : (y == 6)) {
                     int to2 = dir[position][3];
                     if (board.getPiece(to2) != null) {
                         return moves;
@@ -168,7 +169,7 @@ public class Pawn extends Piece {
     @Override
     public ArrayList<Move> generateCaptures(Board board) {
         ArrayList<Move> moves = new ArrayList<>();
-        int[][] dir = (color == 1 ? destinationWhite : destinationBlack);
+        int[][] dir = (color == Color.WHITE ? destinationWhite : destinationBlack);
         int y = position / 8;
         for (int i = 0; i < 2; i++) {
             int to = dir[position][i];
@@ -182,7 +183,7 @@ public class Pawn extends Piece {
                 }
             } else {
                 if (board.getPiece(to).color != color) {
-                    if (color == 1 ? (y < 6) : (y > 1)) {
+                    if (color == Color.WHITE ? (y < 6) : (y > 1)) {
                         Move move = new Move(position, to);
                         if (board.testMove(move, color)) {
                             moves.add(move);

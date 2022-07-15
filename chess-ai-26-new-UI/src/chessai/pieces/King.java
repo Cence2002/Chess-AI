@@ -1,6 +1,7 @@
 package chessai.pieces;
 
 import chessai.game.Board;
+import chessai.game.Color;
 import chessai.game.Move;
 import chessai.game.Position;
 
@@ -12,7 +13,7 @@ public class King extends Piece {
     public static boolean[][] attacks;
     public static int[][][] checks;
 
-    public King(int color, int position) {
+    public King(Color color, int position) {
         super(color, Pieces.King, position);
     }
 
@@ -139,7 +140,7 @@ public class King extends Piece {
                 moves.add(move);
             }
         }
-        if (color == 1) {
+        if (color == Color.WHITE) {
             if (board.castleWK[board.step]
                     && board.getPiece(5) == null
                     && board.getPiece(6) == null

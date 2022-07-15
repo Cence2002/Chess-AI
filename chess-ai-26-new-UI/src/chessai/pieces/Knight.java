@@ -1,6 +1,7 @@
 package chessai.pieces;
 
 import chessai.game.Board;
+import chessai.game.Color;
 import chessai.game.Move;
 import chessai.game.Position;
 
@@ -11,7 +12,7 @@ public class Knight extends Piece {
     public static int[][] destination = new int[64][10];
     public static boolean[][] attacks;
 
-    public Knight(int color, int position) {
+    public Knight(Color color, int position) {
         super(color, Pieces.Knight, position);
     }
 

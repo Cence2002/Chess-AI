@@ -31,9 +31,9 @@ public class AI extends PApplet {
     public boolean useMoveOrdering = true;
 
     public boolean useCaptures = true;
-    public int quiescenceDepth = 8;
+    public int quiescenceDepth = 4;
 
-    public boolean useOpeningDatabase = true;
+    public boolean useOpeningDatabase = Main.useOpeningBias;
     public boolean useRepetitionHistory = true;
     public boolean useTranspositions = true;
 
@@ -100,7 +100,7 @@ public class AI extends PApplet {
             bestMove = null;
             bestMoveInIteration = null;
             stopAlphaBeta = false;
-            for (int depth = 2; depth <= maxDepth && !stopAlphaBeta; depth++) {
+            for (int depth = 1; depth <= maxDepth && !stopAlphaBeta; depth++) {
                 Main.println(depth + ":");
                 minimax(0, depth, -infinity, infinity);
                 if (!stopAlphaBeta && bestMoveInIteration != null) {
@@ -180,7 +180,7 @@ public class AI extends PApplet {
             }
             //opponent is in mate -> good
             //mate later -> worse but still good
-            if (board.isInCheck(1 - board.active)) {
+            if (board.isInCheck(board.active.opposite())) {
                 return mateScore - depth;
             }
             //draw -> neutral
@@ -192,14 +192,6 @@ public class AI extends PApplet {
             for (Move move : moves) {
                 move.score = move.evaluate(board);
             }
-            /*if (searchDepth >= 4) {
-                for (Move move : moves) {
-                    board.makeMove(move, 0);
-                    float eval = -miniAlphaBeta(0, 2, -beta, -alpha);
-                    board.unmakeMove(0);
-                    move.score = eval;
-                }
-            }*/
             if (depth == 0 && bestMove != null) {
                 for (Move move : moves) {
                     if (move.equals(bestMove)) {

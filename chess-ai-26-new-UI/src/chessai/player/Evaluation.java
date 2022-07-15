@@ -2,13 +2,12 @@ package chessai.player;
 
 import chessai.Main;
 import chessai.game.Board;
+import chessai.game.Color;
 import chessai.game.Position;
 import chessai.pieces.King;
 import chessai.pieces.Pawn;
 import chessai.pieces.Piece;
 import chessai.pieces.Pieces;
-
-import java.util.HashMap;
 
 public class Evaluation {
 
@@ -44,34 +43,34 @@ public class Evaluation {
         float whiteEval = 0;
         float blackEval = 0;
 
-        float whitePieceValue = calculatePieceValue(board, 1);
-        float blackPieceValue = calculatePieceValue(board, 0);
+        float whitePieceValue = calculatePieceValue(board, Color.WHITE);
+        float blackPieceValue = calculatePieceValue(board, Color.BLACK);
 
         //how endgame-y is the position for both sides...
-        float whiteEndgameWeight = calculateEndgameWeight(board, 1, whitePieceValue);
-        float blackEndgameWeight = calculateEndgameWeight(board, 0, blackPieceValue);
+        float whiteEndgameWeight = calculateEndgameWeight(board, Color.WHITE, whitePieceValue);
+        float blackEndgameWeight = calculateEndgameWeight(board, Color.BLACK, blackPieceValue);
         float totalEndgameWeight = (whiteEndgameWeight + blackEndgameWeight) / 2;
 
         whiteEval += whitePieceValue;
         blackEval += blackPieceValue;
 
-        whiteEval += calculatePositionValue(board, 1, totalEndgameWeight);
-        blackEval += calculatePositionValue(board, 0, totalEndgameWeight);
+        whiteEval += calculatePositionValue(board, Color.WHITE, totalEndgameWeight);
+        blackEval += calculatePositionValue(board, Color.BLACK, totalEndgameWeight);
 
-        whiteEval += calculateEndgame(board, 1, whitePieceValue, blackPieceValue, blackEndgameWeight);
-        blackEval += calculateEndgame(board, 0, blackPieceValue, whitePieceValue, whiteEndgameWeight);
+        whiteEval += calculateEndgame(board, Color.WHITE, whitePieceValue, blackPieceValue, blackEndgameWeight);
+        blackEval += calculateEndgame(board, Color.BLACK, blackPieceValue, whitePieceValue, whiteEndgameWeight);
 
-        whiteEval += calculateKingSafety(board, 1);
-        blackEval += calculateKingSafety(board, 0);
+        whiteEval += calculateKingSafety(board, Color.WHITE);
+        blackEval += calculateKingSafety(board, Color.BLACK);
 
-        whiteEval += calculatePawnStructure(board, 1);
-        blackEval += calculatePawnStructure(board, 0);
+        whiteEval += calculatePawnStructure(board, Color.WHITE);
+        blackEval += calculatePawnStructure(board, Color.BLACK);
 
-        return (whiteEval - blackEval) * (board.active == 1 ? 1 : -1);
+        return (whiteEval - blackEval) * (board.active == Color.WHITE ? 1 : -1);
     }
 
-    public static float calculatePieceValue(Board board, int color) {
-        int[] pieceCount = (color == 1) ? board.whitePieces : board.blackPieces;
+    public static float calculatePieceValue(Board board, Color color) {
+        int[] pieceCount = (color == Color.WHITE) ? board.whitePieces : board.blackPieces;
         float sum = 0;
         for (int type = 1; type <= 6; type++) {
             sum += typeValue(type) * pieceCount[type];
@@ -79,7 +78,7 @@ public class Evaluation {
         return sum;
     }
 
-    public static float calculatePositionValue(Board board, int color, float endgameWeight) {
+    public static float calculatePositionValue(Board board, Color color, float endgameWeight) {
         float sum = 0;
         for (int pos = 0; pos < 64; pos++) {
             Piece piece = board.getPiece(pos);
@@ -90,18 +89,18 @@ public class Evaluation {
         return sum;
     }
 
-    public static float calculateEndgameWeight(Board board, int color, float pieceValue) {
-        int[] pieceCount = (color == 1) ? board.whitePieces : board.blackPieces;
+    public static float calculateEndgameWeight(Board board, Color color, float pieceValue) {
+        int[] pieceCount = (color == Color.WHITE) ? board.whitePieces : board.blackPieces;
         return 1 - Math.min(1, (pieceValue - pieceCount[2]) / endgameStart);
     }
 
     //color is the friendly one
-    public static float calculateEndgame(Board board, int color, float pieceValue, float opponentPieceValue, float endgameWeight) {
+    public static float calculateEndgame(Board board, Color color, float pieceValue, float opponentPieceValue, float endgameWeight) {
         if (endgameWeight < 0.0001f || pieceValue <= opponentPieceValue + 2) {
             return 0;
         }
-        int kingPos = (color == 1) ? board.whiteKing : board.blackKing;
-        int opponentKingPos = (color == 1) ? board.blackKing : board.whiteKing;
+        int kingPos = (color == Color.WHITE) ? board.whiteKing : board.blackKing;
+        int opponentKingPos = (color == Color.WHITE) ? board.blackKing : board.whiteKing;
         float sum = 0;
         sum += distance[opponentKingPos][36] * 0.12f;
         sum += (14 - distance[opponentKingPos][kingPos]) * 0.08f;
@@ -109,8 +108,8 @@ public class Evaluation {
         return sum * endgameWeight;
     }
 
-    public static float calculateKingSafety(Board board, int color) {
-        int kingPos = (color == 1) ? board.whiteKing : board.blackKing;
+    public static float calculateKingSafety(Board board, Color color) {
+        int kingPos = (color == Color.WHITE) ? board.whiteKing : board.blackKing;
         float sum = 0;
         for (int i = 0; King.destination[kingPos][i] != -1; i++) {
             int to = King.destination[kingPos][i];
@@ -130,8 +129,8 @@ public class Evaluation {
     // dupla -0.1
     // dupla izolált -0.4
 
-    public static float calculatePawnStructure(Board board, int color) {
-        int[][] destinations = (color == 1) ? Pawn.destinationWhite : Pawn.destinationBlack;
+    public static float calculatePawnStructure(Board board, Color color) {
+        int[][] destinations = (color == Color.WHITE) ? Pawn.destinationWhite : Pawn.destinationBlack;
         float sum = 0;
         for (int pos = 0; pos < 64; pos++) {
             Piece piece = board.getPiece(pos);
@@ -180,7 +179,7 @@ public class Evaluation {
     public static float positionValue(Piece piece, float endgameWeight) {
         int x = piece.position % 8;
         int y = piece.position / 8;
-        if (piece.color == 1) {
+        if (piece.color == Color.WHITE) {
             y = 7 - y;
         }
         int pos = 8 * y + x;

@@ -13,28 +13,25 @@ import java.util.*;
 
 public class Main extends PApplet {
 
-    //1: play with white
-    //0: play with black
-    int perspective = 1;
-    //true: play against you
-    //false: moves for you
+    Color color = Color.WHITE;
     boolean playAgainst = true;
-
     boolean moveAutomatically = true;
+    public static boolean useOpeningBias = true;
 
     //visual settings
-    int gridSize = 80;
-    int lightSquareColor = color(240, 217, 181);
-    int darkSquareColor = color(181, 136, 99);
-    int frameRate = 30;
+    int gridSize = 100;
+    int lightSquareColor = color(240, 220, 180);
+    int darkSquareColor = color(180, 140, 100);
+    int frameRate = 20;
 
+    //main agent and board
     AI mainAi;
     Board mainBoard;
 
     //maximal depth to search to
-    public static int maxDepth = 12;
+    public static int maxDepth = 10;
     //maximal response time in milliseconds
-    long maxThinkingTime = 50;
+    long maxThinkingTime = 400;
 
     public static boolean gameEnded = false;
     final HashMap<Integer, PImage> images = new HashMap<>();
@@ -43,6 +40,7 @@ public class Main extends PApplet {
     public static int evalCount = 0;
 
     int pressedSquare = -1;
+    int frames = -1;
 
 
     public void settings() {
@@ -86,55 +84,18 @@ public class Main extends PApplet {
     public void draw() {
         background(0);
         drawSquares();
-        //drawSquareNames();
+        drawSquareNames();
         showLastMove();
-        if (validPos(pressedSquare)) {
-            showLegalMoves(pressedSquare);
-        } else {
+        if (pressedSquare == -1) {
             showLegalMoves(mousePos());
+        } else {
+            showLegalMoves(pressedSquare);
         }
         drawPieces();
         drawSelectedPiece();
         if (frameCount > 1 && !gameEnded && moveAutomatically) {
             autoMove();
         }
-
-        /*int[][] changeCount = {
-                {97133, 142604, 167366, 178540, 170947, 216536, 185631, 43512},
-                {92987, 116424, 154337, 218784, 217596, 127687, 136496, 104594},
-                {51416, 78121, 145398, 115939, 122824, 182068, 81716, 54935},
-                {71068, 86937, 131231, 160606, 162654, 120630, 98602, 74566},
-                {75196, 92554, 133665, 146047, 147151, 109717, 105114, 73524},
-                {62295, 83328, 140256, 117611, 124737, 185387, 82528, 57905},
-                {98907, 129716, 162917, 234700, 218969, 121818, 153320, 101261},
-                {102063, 144043, 167480, 172052, 170166, 222991, 189796, 42076}
-        };
-
-        int max = 0;
-        for (int x = 0; x < 8; x++) {
-            for (int y = 0; y < 8; y++) {
-                max = Math.max(max, changeCount[x][y]);
-            }
-        }
-
-        rectMode(CENTER);
-        for (int x = 0; x < 8; x++) {
-            for (int y = 0; y < 8; y++) {
-                int pos = 8 * y + x;
-                fill(0, 0, (float) changeCount[x][y] / max * 256);
-                rect(getX(pos), getY(pos), gridSize, gridSize);
-            }
-        }
-
-        textAlign(CENTER, CENTER);
-        for (int x = 0; x < 8; x++) {
-            for (int y = 0; y < 8; y++) {
-                int pos = 8 * y + x;
-                fill(255);
-                textSize(gridSize * 0.2f);
-                text((int) ((float) changeCount[x][y] / max * 100), getX(pos), getY(pos));
-            }
-        }*/
     }
 
     void precomputeData() {
@@ -168,7 +129,7 @@ public class Main extends PApplet {
     }
 
     void initGame() {
-        test(1e5);
+        test(2e5);
         //println();
 
         String fen;
@@ -204,6 +165,10 @@ public class Main extends PApplet {
         //fen = "5k2/8/5pK1/5PbP/2Bn4/8/8/8 b - -";
 
         //fen = "8/4q3/2p5/8/pk6/1n2N3/1Q6/1K6 w - -";
+
+        //fen = "1K1RQ3/1BPP2qP/P3P3/1P2n3/3Np3/1b6/ppp3pp/1k3r2 b - -";
+        //fen = "3QR1K1/Pq2PPB1/3P3P/3n2P1/3pN3/6b1/pp3ppp/2r3k1 b - -";
+        //fen = "2r3k1/pp3ppp/6b1/3pN3/3n2P1/3P3P/Pq2PPB1/3QR1K1 b - -";
 
         mainAi = new AI(fen, 1000);
         mainBoard = mainAi.board;
@@ -246,7 +211,7 @@ public class Main extends PApplet {
                 if (piece == null) {
                     continue;
                 }
-                image(images.get(piece.color * 10 + piece.type),
+                image(images.get((piece.color == Color.WHITE ? 10 : 0) + piece.type),
                         getX(piece.position), getY(piece.position));
             }
         }
@@ -256,7 +221,7 @@ public class Main extends PApplet {
         if (pressedSquare != -1) {
             Piece piece = mainBoard.getPiece(pressedSquare);
             if (piece != null) {
-                image(images.get(piece.color * 10 + piece.type),
+                image(images.get((piece.color == Color.WHITE ? 10 : 0) + piece.type),
                         mouseX, mouseY);
             }
         }
@@ -285,14 +250,22 @@ public class Main extends PApplet {
     }
 
     void autoMove() {
-        if ((mainBoard.active != perspective) == playAgainst) {
-            mainAi.AIMove(maxThinkingTime);
+        if ((mainBoard.active != color) == playAgainst) {
+            if (frames == -1) {
+                frames = 0;
+            } else {
+                frames++;
+            }
+            if (frames == 2) {
+                mainAi.AIMove(maxThinkingTime);
+                frames = -1;
+            }
         }
     }
 
     float getX(int pos) {
         int x = (pos % 8);
-        if (perspective == 0) {
+        if (color == Color.BLACK) {
             x = 7 - x;
         }
         return x * gridSize + gridSize / 2f;
@@ -300,7 +273,7 @@ public class Main extends PApplet {
 
     float getY(int pos) {
         int y = 7 - pos / 8;
-        if (perspective == 0) {
+        if (color == Color.BLACK) {
             y = 7 - y;
         }
         return y * gridSize + gridSize / 2f;
@@ -309,7 +282,7 @@ public class Main extends PApplet {
     int mousePos() {
         int mx = mouseX / gridSize;
         int my = 7 - mouseY / gridSize;
-        if (perspective == 0) {
+        if (color == Color.BLACK) {
             mx = 7 - mx;
             my = 7 - my;
         }
@@ -325,7 +298,29 @@ public class Main extends PApplet {
     }
 
     public void mousePressed() {
-        pressedSquare = mousePos();
+        int pos = mousePos();
+        if (pos != -1) {
+            Piece piece = mainBoard.getPiece(pos);
+            if (piece == null) {
+                if (pressedSquare != -1) {
+                    ArrayList<Move> moves = mainBoard.getPiece(pressedSquare).generateMoves(mainBoard);
+                    for (Move m : moves) {
+                        if (m.to == pos) {
+                            return;
+                        }
+                    }
+                    pressedSquare = -1;
+                }
+            } else if (piece.color == mainBoard.active) {
+                if (pos == pressedSquare) {
+                    pressedSquare = -1;
+                } else {
+                    pressedSquare = pos;
+                }
+            } else {
+                pressedSquare = -1;
+            }
+        }
     }
 
     public void mouseReleased() {
@@ -340,6 +335,10 @@ public class Main extends PApplet {
         Piece piece = mainBoard.getPiece(pressedSquare);
         if (piece == null || piece.color != mainBoard.active) {
             pressedSquare = -1;
+            return;
+        }
+
+        if (released == pressedSquare) {
             return;
         }
 
@@ -372,7 +371,10 @@ public class Main extends PApplet {
                 gameEnded = false;
                 pressedSquare = -1;
             }
-            case KeyEvent.VK_ENTER -> mainAi.AIMove(maxThinkingTime);
+            case KeyEvent.VK_ENTER -> {
+                mainAi.AIMove(maxThinkingTime);
+                pressedSquare = -1;
+            }
         }
     }
 
